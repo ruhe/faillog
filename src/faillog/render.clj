@@ -4,9 +4,6 @@
             [faillog.launchpad :as lp]))
 
 
-(def jenkins "http://jenkins-product.srt.mirantis.net:8080/")
-(def job "6.1.staging.centos.bvt_1")
-
 (defn attach-bug [build]
   (if (:bug build)
     (assoc build :bug (lp/get-bug (:bug build)))
@@ -16,7 +13,7 @@
   (sort-by :number > (map attach-bug builds)))
 
 
-(defn render-bugs []
+(defn render-bugs [jenkins job]
   (render-file "index.html"
                {:builds (attach-bugs
                          (jenkins/get-failed-builds jenkins job))}))
