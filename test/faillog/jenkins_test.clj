@@ -18,6 +18,7 @@
    :lastFailedBuild {:number 10}})
 
 (deftest test-get-build-number-range
-  (with-redefs-fn {#'faillog.jenkins/get-build-info (fn [url job] sample-build)}
+  (with-redefs-fn {#'faillog.jenkins/get-build-info
+                   (fn [url job] sample-build)}
     #(is (= (range 1 11)
             (get-build-number-range "fake" "fake")))))

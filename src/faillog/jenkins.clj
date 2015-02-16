@@ -39,24 +39,25 @@
       (Integer. (re-find BUG_ID_REGEX url))
       nil)))
 
+(defn assoc-bug-id [build]
+  (let [descr (:description build)]
+    (if descr
+      (assoc build :bug (find-bug descr))
+      build)))
+
 (defn- get-build [jenkins-url job-name build-number]
-  (let [build
-        (get-build-raw jenkins-url job-name build-number)]
-    (assoc build
-           :bug (find-bug (:description build)))))
+  (assoc-bug-id
+   (get-build-raw jenkins-url job-name build-number)))
 
 (defn- failed-build? [build]
   (not= (:result build) "SUCCESS"))
 
-(defn get-failed-builds [jenkins-url job-name]
-  (filter failed-build?
-          (map (partial get-build jenkins-url job-name)
-               ;; limit number of builds to 10
-               (take-last 10 (get-build-number-range jenkins-url
-                                                      job-name)))))
+(defn remove-description [build]
+  (dissoc build :description))
 
-(defn get-failed-builds2 [jenkins-url job-name]
+(defn get-failed-builds [jenkins-url job-name]
   (->> (get-build-number-range jenkins-url job-name)
-       (take-last 10) ;; take only last 10 builds
+       (take-last 100) ;; take only last 100 builds
        (map (partial get-build jenkins-url job-name))
+       (map remove-description)
        (filter failed-build?)))
