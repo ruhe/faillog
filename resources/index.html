@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-<header><h1>{{header}}</h1>
-    <ul id="navigation">
-
-    </ul>
-</header>
+<table>
+{% for build in builds %}
+<tr>
+<td>{{build.number}}</td>
+<td><a href="https://launchpad.net/bugs/{{build.bug.id}}">{{build.bug.title}}</a></td>
+<td>{{build.bug.status}}</td>
+<td><a href="https://launchpad.net/~{{build.bug.assignee.name}}">{{build.bug.assignee.display_name}}</a></td>
+<td>{{build.bug.target}}</td>
+</tr>
+{% endfor %}
+<table>
 </body>
 </html>
