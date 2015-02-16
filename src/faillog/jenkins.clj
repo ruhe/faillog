@@ -26,7 +26,7 @@
       ;; inc lastFailedBuild number because clojure range excludes last value
       (-> build :lastFailedBuild :number inc))))
 
-(defn- get-build-raw [jenkins-url job-name build-number]
+(defn get-build-raw [jenkins-url job-name build-number]
   (json-get
    (format BUILD_INFO_URL
            jenkins-url
@@ -51,12 +51,12 @@
 (defn get-failed-builds [jenkins-url job-name]
   (filter failed-build?
           (map (partial get-build jenkins-url job-name)
-               ;; limit number of builds to 100
-               (take-last 100 (get-build-number-range jenkins-url
+               ;; limit number of builds to 10
+               (take-last 10 (get-build-number-range jenkins-url
                                                       job-name)))))
 
 (defn get-failed-builds2 [jenkins-url job-name]
   (->> (get-build-number-range jenkins-url job-name)
-       (take-last 10)
+       (take-last 10) ;; take only last 10 builds
        (map (partial get-build jenkins-url job-name))
        (filter failed-build?)))
