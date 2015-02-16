@@ -10,11 +10,20 @@
   "https://api.launchpad.net/1.0/bugs/%d")
 
 
-(defn- get-assignee [link]
+(defn- get-assignee-internal [link]
   (-> (json-get link)
       (select-keys [:display_name :name])))
 
-(def get-assignee-memo (memoize get-assignee))
+(def get-assignee (memoize get-assignee-internal))
+
+(defn- append-assignee-info [bug]
+  "Appends info about assignee {:name, :display_name} to the bug,
+   if there is :assignee_link. Otherwise returns the bug as is"
+  (let [link (:assignee_link bug)]
+    (if link
+      (assoc bug :assignee (get-assignee link))
+      bug)))
+
 
 (defn- get-main-bug-task-raw [bug-id]
   (-> (json-get (format BUG_TASKS_URL bug-id))
@@ -24,32 +33,30 @@
                     :importance :milestone_link :status])
       (rename-keys {:bug_target_name :target})))
 
+(defn- append-main-bug-task [bug]
+  (into (get-main-bug-task-raw (:id bug)) bug))
+
+
 (defn- get-bug-basic-info [url]
   (-> (json-get url)
       (select-keys [:id :title :duplicate_of_link])))
 
-(defn- check-if-duplicate [bug]
+(defn- replace-duplicate [bug]
+  "Check if bug is a duplicate of another one.
+   If so, query another bug, instead of the duplicate,
+   otherwise return bug without any changes."
   (if (nil? (:duplicate_of_link bug))
     bug
     (get-bug-basic-info (:duplicate_of_link bug))))
 
-
-(defn- get-main-bug-task [bug-id]
-  (let [bug (get-main-bug-task-raw bug-id)
-        assignee_link (:assignee_link bug)]
-    (if (not (nil? (:assignee_link bug)))
-      (assoc bug
-        :assignee (get-assignee-memo (:assignee_link bug)))
-      bug)))
-
-(defn- append-main-bug-task [bug]
-  (into (get-main-bug-task (:id bug)) bug))
+(defn- cleanup-bug [bug]
+  (dissoc bug :assignee_link :duplicate_of_link))
 
 (defn- get-bug-internal [bug-id]
   (-> (get-bug-basic-info (format BUG_URL bug-id))
-      (check-if-duplicate)
+      (replace-duplicate)
       (append-main-bug-task)
-      (dissoc :assignee_link)
-      (dissoc :duplicate_of_link)))
+      (append-assignee-info)
+      (cleanup-bug)))
 
 (def get-bug (memoize get-bug-internal))

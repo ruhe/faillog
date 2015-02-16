@@ -36,7 +36,10 @@
 (defn find-bug [build-description]
   (let [url (re-find URL_REGEX build-description)]
     (if url
-      (Integer. (re-find BUG_ID_REGEX url))
+      (try
+        (Integer. (re-find BUG_ID_REGEX url))
+        (catch Exception e
+          nil))
       nil)))
 
 (defn assoc-bug-id [build]
