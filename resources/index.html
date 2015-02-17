@@ -1,16 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</head>
 <body>
-<table>
-{% for build in builds %}
-<tr>
-<td>{{build.number}}</td>
-<td><a href="https://launchpad.net/bugs/{{build.bug.id}}">{{build.bug.title}}</a></td>
-<td>{{build.bug.status}}</td>
-<td><a href="https://launchpad.net/~{{build.bug.assignee.name}}">{{build.bug.assignee.display_name}}</a></td>
-<td>{{build.bug.target}}</td>
-</tr>
+<div class="container">
+
+<div>
+<ul class="list-inline">
+{% for job in jobs %}
+<li><h5><a href="#{{job.job}}">{{job.job}}</a><h5></li>
 {% endfor %}
-<table>
+</ul>
+</div>
+
+{% for job in jobs %}
+<hr/>
+<h3>
+<a href="{{jenkins}}/view/All/job/{{job.job}}" name="{{job.job}}">{{job.job}}</a>
+</h3>
+
+<table class="table table-hover table-striped">
+	<tr>
+		<th>#Build</th>
+		<th>Date</th>
+		<th>Bug</th>
+		<th>Status</th>
+		<th>Assignee</th>
+		<th>Target</th>
+	</tr>
+
+	{% for build in job.builds %}
+		{% for bug in build.bugs %}
+		<tr>
+			<td><a href="{{jenkins}}/view/All/job/{{job}}/{{build.number}}">{{build.number}}</a></td>
+			<td>{{build.date}}</td>
+			<td><a href="https://launchpad.net/bugs/{{bug.id}}">{{bug.title}}</a></td>
+			<td>{{bug.status}}</td>
+			<td><a href="https://launchpad.net/~{{bug.assignee.name}}">{{bug.assignee.display_name}}</a></td>
+			<td>{{bug.target}}</td>
+		</tr>
+		{% endfor %}
+	{% endfor %}
+</table>
+{% endfor %}
+
+</div>
 </body>
 </html>

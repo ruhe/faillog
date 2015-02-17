@@ -5,15 +5,23 @@
 
 
 (defn attach-bug [build]
-  (if (:bug build)
-    (assoc build :bug (lp/get-bug (:bug build)))
+  (if (:bugs build)
+    (assoc build :bugs (map #(lp/get-bug %) (:bugs build)))
     build))
 
 (defn attach-bugs [builds]
   (sort-by :number > (map attach-bug builds)))
 
 
-(defn render-bugs [jenkins job]
+(defn foo [jenkins jobs]
+  (map (fn [x] {:job x :builds (attach-bugs
+                          (jenkins/get-failed-builds jenkins x))}) jobs))
+
+(defn render-bugs [jenkins jobs]
   (render-file "index.html"
-               {:builds (attach-bugs
-                         (jenkins/get-failed-builds jenkins job))}))
+               {:jenkins jenkins
+                :jobs (foo jenkins jobs)}))
+
+
+(defn generate-report [jenkins job]
+  (spit "/tmp/test.html" (render-bugs jenkins job)))

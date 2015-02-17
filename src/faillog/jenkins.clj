@@ -1,5 +1,5 @@
 (ns faillog.jenkins
-  (:require [faillog.util :use json-get]))
+  (:require [faillog.util :use [json-get ts-to-datestr]]))
 
 (def JOB_INFO_URL
   "%s/job/%s/api/json?tree=firstBuild[number],lastFailedBuild[number]")
@@ -33,23 +33,21 @@
            job-name
            build-number)))
 
-(defn find-bug [build-description]
-  (let [url (re-find URL_REGEX build-description)]
-    (if url
-      (try
-        (Integer. (re-find BUG_ID_REGEX url))
-        (catch Exception e
-          nil))
-      nil)))
+(defn find-bugs [build-description]
+  (let [urls (re-seq URL_REGEX build-description)]
+    (if (not-empty urls)
+      (map #(Integer/parseInt %)
+           (map (partial re-find BUG_ID_REGEX) urls))
+      ())))
 
-(defn assoc-bug-id [build]
+(defn assoc-bugs [build]
   (let [descr (:description build)]
     (if descr
-      (assoc build :bug (find-bug descr))
+      (assoc build :bugs (find-bugs descr))
       build)))
 
 (defn- get-build [jenkins-url job-name build-number]
-  (assoc-bug-id
+  (assoc-bugs
    (get-build-raw jenkins-url job-name build-number)))
 
 (defn- failed-build? [build]
@@ -58,9 +56,13 @@
 (defn remove-description [build]
   (dissoc build :description))
 
+(defn attach-date [build]
+  (assoc build :date (ts-to-datestr (:timestamp build))))
+
 (defn get-failed-builds [jenkins-url job-name]
   (->> (get-build-number-range jenkins-url job-name)
        (take-last 100) ;; take only last 100 builds
        (map (partial get-build jenkins-url job-name))
+       (map attach-date)
        (map remove-description)
        (filter failed-build?)))

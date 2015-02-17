@@ -53,10 +53,13 @@
   (dissoc bug :assignee_link :duplicate_of_link))
 
 (defn- get-bug-internal [bug-id]
-  (-> (get-bug-basic-info (format BUG_URL bug-id))
-      (replace-duplicate)
-      (append-main-bug-task)
-      (append-assignee-info)
-      (cleanup-bug)))
+  (try
+    (-> (get-bug-basic-info (format BUG_URL bug-id))
+        (replace-duplicate)
+        (append-main-bug-task)
+        (append-assignee-info)
+        (cleanup-bug))
+    (catch Exception e
+      {:id bug-id :title "Unknown"})))
 
 (def get-bug (memoize get-bug-internal))
