@@ -16,9 +16,10 @@
 
 (def get-assignee (memoize get-assignee-internal))
 
-(defn- append-assignee-info [bug]
+(defn- append-assignee-info
   "Appends info about assignee {:name, :display_name} to the bug,
    if there is :assignee_link. Otherwise returns the bug as is"
+  [bug]
   (let [link (:assignee_link bug)]
     (if link
       (assoc bug :assignee (get-assignee link))
@@ -41,10 +42,11 @@
   (-> (json-get url)
       (select-keys [:id :title :duplicate_of_link])))
 
-(defn- replace-duplicate [bug]
+(defn- replace-duplicate
   "Check if bug is a duplicate of another one.
    If so, query another bug, instead of the duplicate,
    otherwise return bug without any changes."
+  [bug]
   (if (nil? (:duplicate_of_link bug))
     bug
     (get-bug-basic-info (:duplicate_of_link bug))))

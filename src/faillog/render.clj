@@ -12,16 +12,17 @@
 (defn attach-bugs [builds]
   (sort-by :number > (map attach-bug builds)))
 
-
-(defn foo [jenkins jobs]
-  (map (fn [x] {:job x :builds (attach-bugs
-                          (jenkins/get-failed-builds jenkins x))}) jobs))
+(defn build-report [jenkins jobs]
+  (map (fn [name] {:name name
+                   :builds (attach-bugs
+                            (jenkins/get-failed-builds jenkins name))})
+       jobs))
 
 (defn render-bugs [jenkins jobs]
   (render-file "index.html"
                {:jenkins jenkins
-                :jobs (foo jenkins jobs)}))
+                :jobs (build-report jenkins jobs)}))
 
 
-(defn generate-report [jenkins job]
-  (spit "/tmp/test.html" (render-bugs jenkins job)))
+(defn generate-report [jenkins jobs output]
+  (spit output (render-bugs jenkins jobs)))

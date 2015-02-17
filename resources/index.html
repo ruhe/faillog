@@ -10,16 +10,16 @@
 <div>
 <ul class="list-inline">
 {% for job in jobs %}
-<li><h5><a href="#{{job.job}}">{{job.job}}</a><h5></li>
+<li><h5><a href="#{{job.name}}">{{job.name}}</a><h5></li>
 {% endfor %}
 </ul>
 </div>
 
 {% for job in jobs %}
 <hr/>
-<h3>
-<a href="{{jenkins}}/view/All/job/{{job.job}}" name="{{job.job}}">{{job.job}}</a>
-</h3>
+<h4 class="text-danger">
+<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Failed builds in <a class="text-danger" href="{{jenkins}}/view/All/job/{{job.name}}" name="{{job.name}}">{{job.name}}</a>
+</h4>
 
 <table class="table table-hover table-striped">
 	<tr>
@@ -34,7 +34,7 @@
 	{% for build in job.builds %}
 		{% for bug in build.bugs %}
 		<tr>
-			<td><a href="{{jenkins}}/view/All/job/{{job}}/{{build.number}}">{{build.number}}</a></td>
+			<td><a href="{{jenkins}}/view/All/job/{{job.name}}/{{build.number}}">{{build.number}}</a></td>
 			<td>{{build.date}}</td>
 			<td><a href="https://launchpad.net/bugs/{{bug.id}}">{{bug.title}}</a></td>
 			<td>{{bug.status}}</td>
