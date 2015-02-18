@@ -62,6 +62,6 @@
         (append-assignee-info)
         (cleanup-bug))
     (catch Exception e
-      {:id bug-id :title "Unknown"})))
+      {:id bug-id :title (format "Unknown #%d" bug-id)})))
 
 (def get-bug (memoize get-bug-internal))

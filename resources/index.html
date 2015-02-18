@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 </head>
@@ -42,6 +43,16 @@
 			<td>{{bug.target}}</td>
 		</tr>
 		{% endfor %}
+		{% if build.bugs|empty? %}
+		<tr>
+			<td><a href="{{jenkins}}/view/All/job/{{job.name}}/{{build.number}}">{{build.number}}</a></td>
+			<td>{{build.date}}</td>
+			<td><i class="fa fa-exclamation-triangle"></i> No bugs attached</td>
+			<td>-</td>
+			<td>-</td>
+			<td>-</td>
+		</tr>
+		{% endif %}
 	{% endfor %}
 </table>
 {% endfor %}
